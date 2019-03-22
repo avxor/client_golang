@@ -58,7 +58,7 @@ var (
 
 func init() {
 	MustRegister(NewProcessCollector(ProcessCollectorOpts{}))
-	MustRegister(NewGoCollector())
+	MustRegister(NewGoCollector(""))
 }
 
 // NewRegistry creates a new vanilla Registry without any Collectors

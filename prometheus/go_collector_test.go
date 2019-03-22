@@ -23,7 +23,7 @@ import (
 
 func TestGoCollector(t *testing.T) {
 	var (
-		c      = NewGoCollector()
+		c      = NewGoCollector("")
 		ch     = make(chan Metric)
 		waitc  = make(chan struct{})
 		closec = make(chan struct{})
@@ -81,7 +81,7 @@ func TestGoCollector(t *testing.T) {
 
 func TestGCCollector(t *testing.T) {
 	var (
-		c        = NewGoCollector()
+		c        = NewGoCollector("")
 		ch       = make(chan Metric)
 		waitc    = make(chan struct{})
 		closec   = make(chan struct{})

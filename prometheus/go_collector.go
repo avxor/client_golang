@@ -36,28 +36,36 @@ type goCollector struct {
 // (~25µs). However, with older Go versions, the stop-the-world duration depends
 // on the heap size and can be quite significant (~1.7 ms/GiB as per
 // https://go-review.googlesource.com/c/go/+/34937).
-func NewGoCollector() Collector {
+func NewGoCollector(namespace string) Collector {
+	prefixFunc := func(name string) string {
+		if namespace == "" {
+			return name
+		}
+
+		return fmt.Sprintf("%s_%s", namespace, name)
+	}
+
 	return &goCollector{
 		goroutinesDesc: NewDesc(
-			"go_goroutines",
+			prefixFunc("go_goroutines"),
 			"Number of goroutines that currently exist.",
 			nil, nil),
 		threadsDesc: NewDesc(
-			"go_threads",
+			prefixFunc("go_threads"),
 			"Number of OS threads created.",
 			nil, nil),
 		gcDesc: NewDesc(
-			"go_gc_duration_seconds",
+			prefixFunc("go_gc_duration_seconds"),
 			"A summary of the GC invocation durations.",
 			nil, nil),
 		goInfoDesc: NewDesc(
-			"go_info",
+			prefixFunc("go_info"),
 			"Information about the Go environment.",
 			nil, Labels{"version": runtime.Version()}),
 		metrics: memStatsMetrics{
 			{
 				desc: NewDesc(
-					memstatNamespace("alloc_bytes"),
+					prefixFunc(memstatNamespace("alloc_bytes")),
 					"Number of bytes allocated and still in use.",
 					nil, nil,
 				),
@@ -65,7 +73,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("alloc_bytes_total"),
+					prefixFunc(memstatNamespace("alloc_bytes_total")),
 					"Total number of bytes allocated, even if freed.",
 					nil, nil,
 				),
@@ -73,7 +81,7 @@ func NewGoCollector() Collector {
 				valType: CounterValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("sys_bytes"),
+					prefixFunc(memstatNamespace("sys_bytes")),
 					"Number of bytes obtained from system.",
 					nil, nil,
 				),
@@ -81,7 +89,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("lookups_total"),
+					prefixFunc(memstatNamespace("lookups_total")),
 					"Total number of pointer lookups.",
 					nil, nil,
 				),
@@ -89,7 +97,7 @@ func NewGoCollector() Collector {
 				valType: CounterValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("mallocs_total"),
+					prefixFunc(memstatNamespace("mallocs_total")),
 					"Total number of mallocs.",
 					nil, nil,
 				),
@@ -97,7 +105,7 @@ func NewGoCollector() Collector {
 				valType: CounterValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("frees_total"),
+					prefixFunc(memstatNamespace("frees_total")),
 					"Total number of frees.",
 					nil, nil,
 				),
@@ -105,7 +113,7 @@ func NewGoCollector() Collector {
 				valType: CounterValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("heap_alloc_bytes"),
+					prefixFunc(memstatNamespace("heap_alloc_bytes")),
 					"Number of heap bytes allocated and still in use.",
 					nil, nil,
 				),
@@ -113,7 +121,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("heap_sys_bytes"),
+					prefixFunc(memstatNamespace("heap_sys_bytes")),
 					"Number of heap bytes obtained from system.",
 					nil, nil,
 				),
@@ -121,7 +129,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("heap_idle_bytes"),
+					prefixFunc(memstatNamespace("heap_idle_bytes")),
 					"Number of heap bytes waiting to be used.",
 					nil, nil,
 				),
@@ -129,7 +137,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("heap_inuse_bytes"),
+					prefixFunc(memstatNamespace("heap_inuse_bytes")),
 					"Number of heap bytes that are in use.",
 					nil, nil,
 				),
@@ -137,7 +145,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("heap_released_bytes"),
+					prefixFunc(memstatNamespace("heap_released_bytes")),
 					"Number of heap bytes released to OS.",
 					nil, nil,
 				),
@@ -145,7 +153,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("heap_objects"),
+					prefixFunc(memstatNamespace("heap_objects")),
 					"Number of allocated objects.",
 					nil, nil,
 				),
@@ -153,7 +161,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("stack_inuse_bytes"),
+					prefixFunc(memstatNamespace("stack_inuse_bytes")),
 					"Number of bytes in use by the stack allocator.",
 					nil, nil,
 				),
@@ -161,7 +169,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("stack_sys_bytes"),
+					prefixFunc(memstatNamespace("stack_sys_bytes")),
 					"Number of bytes obtained from system for stack allocator.",
 					nil, nil,
 				),
@@ -169,7 +177,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("mspan_inuse_bytes"),
+					prefixFunc(memstatNamespace("mspan_inuse_bytes")),
 					"Number of bytes in use by mspan structures.",
 					nil, nil,
 				),
@@ -177,7 +185,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("mspan_sys_bytes"),
+					prefixFunc(memstatNamespace("mspan_sys_bytes")),
 					"Number of bytes used for mspan structures obtained from system.",
 					nil, nil,
 				),
@@ -185,7 +193,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("mcache_inuse_bytes"),
+					prefixFunc(memstatNamespace("mcache_inuse_bytes")),
 					"Number of bytes in use by mcache structures.",
 					nil, nil,
 				),
@@ -193,7 +201,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("mcache_sys_bytes"),
+					prefixFunc(memstatNamespace("mcache_sys_bytes")),
 					"Number of bytes used for mcache structures obtained from system.",
 					nil, nil,
 				),
@@ -201,7 +209,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("buck_hash_sys_bytes"),
+					prefixFunc(memstatNamespace("buck_hash_sys_bytes")),
 					"Number of bytes used by the profiling bucket hash table.",
 					nil, nil,
 				),
@@ -209,7 +217,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("gc_sys_bytes"),
+					prefixFunc(memstatNamespace("gc_sys_bytes")),
 					"Number of bytes used for garbage collection system metadata.",
 					nil, nil,
 				),
@@ -217,7 +225,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("other_sys_bytes"),
+					prefixFunc(memstatNamespace("other_sys_bytes")),
 					"Number of bytes used for other system allocations.",
 					nil, nil,
 				),
@@ -225,7 +233,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("next_gc_bytes"),
+					prefixFunc(memstatNamespace("next_gc_bytes")),
 					"Number of heap bytes when next garbage collection will take place.",
 					nil, nil,
 				),
@@ -233,7 +241,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("last_gc_time_seconds"),
+					prefixFunc(memstatNamespace("last_gc_time_seconds")),
 					"Number of seconds since 1970 of last garbage collection.",
 					nil, nil,
 				),
@@ -241,7 +249,7 @@ func NewGoCollector() Collector {
 				valType: GaugeValue,
 			}, {
 				desc: NewDesc(
-					memstatNamespace("gc_cpu_fraction"),
+					prefixFunc(memstatNamespace("gc_cpu_fraction")),
 					"The fraction of this program's available CPU time used by the GC since the program started.",
 					nil, nil,
 				),

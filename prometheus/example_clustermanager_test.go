@@ -134,7 +134,7 @@ func ExampleCollector() {
 	// Add the standard process and Go metrics to the custom registry.
 	reg.MustRegister(
 		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
-		prometheus.NewGoCollector(),
+		prometheus.NewGoCollector(""),
 	)
 
 	http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
