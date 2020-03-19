@@ -44,9 +44,14 @@ func TestGoCollectorGoroutines(t *testing.T) {
 
 	go func() {
 		c.Collect(metricCh)
-		go func(c <-chan struct{}) {
-			<-c
-		}(endGoroutineCh)
+		for i := 1; i <= 10; i++ {
+			// Start 10 goroutines to be sure we'll detect an
+			// increase even if unrelated goroutines happen to
+			// terminate during this test.
+			go func(c <-chan struct{}) {
+				<-c
+			}(endGoroutineCh)
+		}
 		<-waitCh
 		c.Collect(metricCh)
 		close(endCollectionCh)
@@ -73,9 +78,8 @@ func TestGoCollectorGoroutines(t *testing.T) {
 				continue
 			}
 
-			if diff := int(pb.GetGauge().GetValue()) - old; diff != 1 {
-				// TODO: This is flaky in highly concurrent situations.
-				t.Errorf("want 1 new goroutine, got %d", diff)
+			if diff := old - int(pb.GetGauge().GetValue()); diff > -1 {
+				t.Errorf("want at least one new goroutine, got %d fewer", diff)
 			}
 		case <-time.After(1 * time.Second):
 			t.Fatalf("expected collect timed out")
@@ -147,11 +151,11 @@ func TestGoCollectorGC(t *testing.T) {
 				close(waitCh)
 				continue
 			}
-			if diff := *pb.GetSummary().SampleCount - oldGC; diff != 1 {
-				t.Errorf("want 1 new garbage collection run, got %d", diff)
+			if diff := *pb.GetSummary().SampleCount - oldGC; diff < 1 {
+				t.Errorf("want at least 1 new garbage collection run, got %d", diff)
 			}
 			if diff := *pb.GetSummary().SampleSum - oldPause; diff <= 0 {
-				t.Errorf("want moar pause, got %f", diff)
+				t.Errorf("want an increase in pause time, got a change of %f", diff)
 			}
 		case <-time.After(1 * time.Second):
 			t.Fatalf("expected collect timed out")
@@ -193,14 +197,14 @@ func TestGoCollectorMemStats(t *testing.T) {
 		}
 	}
 
-	// Speed up the timing to make the tast faster.
-	c.msMaxWait = time.Millisecond
-	c.msMaxAge = 10 * time.Millisecond
+	// Speed up the timing to make the test faster.
+	c.msMaxWait = 5 * time.Millisecond
+	c.msMaxAge = 50 * time.Millisecond
 
 	// Scenario 1: msRead responds slowly, no previous memstats available,
 	// msRead is executed anyway.
 	c.msRead = func(ms *runtime.MemStats) {
-		time.Sleep(3 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 		ms.Alloc = 1
 	}
 	checkCollect(1)
@@ -227,12 +231,12 @@ func TestGoCollectorMemStats(t *testing.T) {
 	// Scenario 3: msRead responds slowly, previous memstats available, old
 	// value collected.
 	c.msRead = func(ms *runtime.MemStats) {
-		time.Sleep(3 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 		ms.Alloc = 3
 	}
 	checkCollect(2)
 	// After waiting, new value is still set in msLast.
-	time.Sleep(12 * time.Millisecond)
+	time.Sleep(80 * time.Millisecond)
 	c.msMtx.Lock()
 	if want, got := uint64(3), c.msLast.Alloc; want != got {
 		t.Errorf("unexpected of msLast.Alloc, want %d, got %d", want, got)
@@ -242,7 +246,7 @@ func TestGoCollectorMemStats(t *testing.T) {
 	// Scenario 4: msRead responds slowly, previous memstats is too old, new
 	// value collected.
 	c.msRead = func(ms *runtime.MemStats) {
-		time.Sleep(3 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 		ms.Alloc = 4
 	}
 	checkCollect(4)

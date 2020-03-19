@@ -1,3 +1,68 @@
+## 1.5.1 / 2020-03-14
+
+* [BUGFIX] promhttp: Remove another superfluous `WriteHeader` call.
+
+## 1.5.0 / 2020-03-03
+
+* [FEATURE] promauto: Add a factory to allow automatic registration with a local registry. #713
+* [FEATURE] promauto: Add `NewUntypedFunc`. #713
+* [FEATURE] API client: Support new metadata endpoint. #718
+
+## 1.4.1 / 2020-02-07
+
+* [BUGFIX] Fix timestamp of exemplars in `CounterVec`. #710
+
+## 1.4.0 / 2020-01-27
+
+* [CHANGE] Go collector: Improve doc string for `go_gc_duration_seconds`. #702
+* [FEATURE] Support a subset of OpenMetrics, including exemplars. Needs opt-in via `promhttp.HandlerOpts`. **EXPERIMENTAL** #706
+* [FEATURE] Add `testutil.CollectAndCount`. #703
+
+## 1.3.0 / 2019-12-21
+
+* [FEATURE] Support tags in Graphite bridge. #668
+* [BUGFIX] API client: Actually return Prometheus warnings. #699
+
+## 1.2.1 / 2019-10-17
+
+* [BUGFIX] Fix regression in the implementation of `Registerer.Unregister`. #663
+
+## 1.2.0 / 2019-10-15
+
+* [FEATURE] Support pushing to Pushgateway v0.10+. #652
+* [ENHANCEMENT] Improve hashing to make a spurious `AlreadyRegisteredError` less likely to occur. #657
+* [ENHANCEMENT] API client: Add godoc examples. #630
+* [BUGFIX] promhttp: Correctly call WriteHeader in HTTP middleware. #634
+
+## 1.1.0 / 2019-08-01
+
+* [CHANGE] API client: Format time as UTC rather than RFC3339Nano. #617
+* [CHANGE] API client: Add warnings to `LabelValues` and `LabelNames` calls. #609
+* [FEATURE] Push: Support base64 encoding in grouping key. #624
+* [FEATURE] Push: Add Delete method to Pusher. #613
+
+## 1.0.0 / 2019-06-15
+
+_This release removes all previously deprecated features, resulting in the breaking changes listed below. As this is v1.0.0, semantic versioning applies from now on, with the exception of the API client and parts marked explicitly as experimental._
+
+* [CHANGE] Remove objectives from the default `Summary`. (Objectives have to be set explicitly in the `SummaryOpts`.) #600
+* [CHANGE] Remove all HTTP related feature in the `prometheus` package. (Use the `promhttp` package instead.)  #600
+* [CHANGE] Remove `push.FromGatherer`, `push.AddFromGatherer`, `push.Collectors`. (Use `push.New` instead.) #600
+* [CHANGE] API client: Pass warnings through on non-error responses. #599
+* [CHANGE] API client: Add warnings to `Series` call. #603
+* [FEATURE] Make process collector work on Microsoft Windows. **EXPERIMENTAL** #596
+* [FEATURE] API client: Add `/labels` call. #604
+* [BUGFIX] Make `AlreadyRegisteredError` usable for wrapped registries. #607
+
+## 0.9.4 / 2019-06-07
+* [CHANGE] API client: Switch to alert values as strings. #585
+* [FEATURE] Add a collector for Go module build information. #595
+* [FEATURE] promhttp: Add an counter for internal errors during HTTP exposition. #594
+* [FEATURE] API client: Support target metadata API. #590
+* [FEATURE] API client: Support storage warnings. #562
+* [ENHANCEMENT] API client: Improve performance handling JSON. #570
+* [BUGFIX] Reduce test flakiness. #573
+
 ## 0.9.3 / 2019-05-16
 * [CHANGE] Required Go version is now 1.9+. #561
 * [FEATURE] API client: Add POST with get fallback for Query/QueryRange. #557
